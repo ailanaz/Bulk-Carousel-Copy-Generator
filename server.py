@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import csv
 import json
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -363,10 +364,51 @@ def build_carousels(topics: Dict[str, str], videos_per_topic: int = 20) -> List[
     return carousels
 
 
+def write_canva_csv(carousels: List[Dict[str, Any]], output_path: str) -> str:
+    output_file = Path(output_path).resolve()
+    fieldnames = [
+        "carousel_id",
+        "category",
+        "topic",
+        "slide_1_hook",
+        "slide_2",
+        "slide_3",
+        "slide_4",
+        "slide_5",
+        "slide_6",
+        "caption",
+        "hashtags",
+    ]
+
+    with output_file.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+
+        for carousel in carousels:
+            body_slides = carousel["body_slides"]
+            row = {
+                "carousel_id": carousel["id"],
+                "category": carousel["category"],
+                "topic": carousel["topic"],
+                "slide_1_hook": carousel["hook"],
+                "slide_2": body_slides[0] if len(body_slides) > 0 else "",
+                "slide_3": body_slides[1] if len(body_slides) > 1 else "",
+                "slide_4": body_slides[2] if len(body_slides) > 2 else "",
+                "slide_5": body_slides[3] if len(body_slides) > 3 else "",
+                "slide_6": body_slides[4] if len(body_slides) > 4 else "",
+                "caption": carousel["caption"],
+                "hashtags": " ".join(carousel["hashtags"]),
+            }
+            writer.writerow(row)
+
+    return str(output_file)
+
+
 def generate_payload(
     topics: Dict[str, str] | None = None,
     videos_per_topic: int = 20,
     output_path: str = "tiktok-carousels-output.json",
+    csv_output_path: str = "tiktok-carousels-output.csv",
 ) -> Dict[str, Any]:
     topics = normalize_topics(topics)
     carousels = build_carousels(topics, videos_per_topic)
@@ -389,7 +431,9 @@ def generate_payload(
 
     output_file = Path(output_path).resolve()
     output_file.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    csv_output_file = write_canva_csv(carousels, csv_output_path)
     payload["output_file"] = str(output_file)
+    payload["csv_output_file"] = csv_output_file
     return payload
 
 
@@ -401,9 +445,15 @@ if FastMCP is not None:
         topics: Dict[str, str] | None = None,
         videos_per_topic: int = 20,
         output_path: str = "tiktok-carousels-output.json",
+        csv_output_path: str = "tiktok-carousels-output.csv",
     ) -> Dict[str, Any]:
-        """Generate bulk TikTok photo carousel copy and write it to a JSON file."""
-        return generate_payload(topics=topics, videos_per_topic=videos_per_topic, output_path=output_path)
+        """Generate bulk TikTok photo carousel copy and write it to JSON and CSV files."""
+        return generate_payload(
+            topics=topics,
+            videos_per_topic=videos_per_topic,
+            output_path=output_path,
+            csv_output_path=csv_output_path,
+        )
 else:  # pragma: no cover
     mcp = None
 

@@ -95,11 +95,30 @@ Input shape:
     "Supportive Services": "LLC formation services",
     "Official Links": "Cottage food laws by state"
   },
-  "videos_per_topic": 20
+  "videos_per_topic": 20,
+  "output_path": "tiktok-carousels-output.json",
+  "csv_output_path": "tiktok-carousels-output.csv"
 }
 ```
 
-The tool writes `tiktok-carousels-output.json` and returns the full payload plus the output file path.
+The tool writes:
+
+- `tiktok-carousels-output.json`
+- `tiktok-carousels-output.csv`
+
+The CSV file is flat and Canva-friendly. Each row is one carousel with these columns:
+
+- `carousel_id`
+- `category`
+- `topic`
+- `slide_1_hook`
+- `slide_2`
+- `slide_3`
+- `slide_4`
+- `slide_5`
+- `slide_6`
+- `caption`
+- `hashtags`
 
 ## Standalone use
 
@@ -113,7 +132,10 @@ That writes:
 
 ```text
 tiktok-carousels-output.json
+tiktok-carousels-output.csv
 ```
+
+The CSV file is the one to use for Canva Bulk Create.
 
 ## Output format
 
