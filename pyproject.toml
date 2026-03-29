@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "bulk-carousel-copy-generator"
 version = "0.1.0"
-description = "MCP server that generates bulk TikTok carousel copy from five category topics."
+description = "MCP server that generates bulk TikTok carousel copy from custom topics and subtopics. Income Spectrum topics in the repo are starter examples."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [

@@ -55,6 +55,12 @@ class CategoryProfile:
     cta: str
 
 
+@dataclass(frozen=True)
+class TopicConfig:
+    topic: str
+    subtopics: List[str]
+
+
 CATEGORY_PROFILES: Dict[str, CategoryProfile] = {
     "Business Ideas": CategoryProfile(
         descriptor="business idea",
@@ -140,6 +146,38 @@ def ensure_voice_rules(text: str) -> str:
     return text
 
 
+def normalize_subtopics(value: Any) -> List[str]:
+    if value in (None, ""):
+        return []
+    if not isinstance(value, list):
+        raise ValueError("subtopics must be a list of strings.")
+
+    cleaned: List[str] = []
+    for item in value:
+        if not isinstance(item, str):
+            raise ValueError("Each subtopic must be a string.")
+        text = clean_text(item)
+        if text:
+            cleaned.append(text)
+    return cleaned
+
+
+def normalize_topic_entry(value: Any, category: str) -> TopicConfig:
+    if isinstance(value, str):
+        topic = clean_text(value)
+        if not topic:
+            raise ValueError(f'Missing topic for "{category}".')
+        return TopicConfig(topic=topic, subtopics=[])
+
+    if isinstance(value, dict):
+        topic = clean_text(str(value.get("topic", "")))
+        if not topic:
+            raise ValueError(f'Missing topic for "{category}".')
+        return TopicConfig(topic=topic, subtopics=normalize_subtopics(value.get("subtopics")))
+
+    raise ValueError(f'Topic for "{category}" must be a string or an object with "topic" and optional "subtopics".')
+
+
 def build_hashtags(category: str, topic: str, index: int) -> List[str]:
     profile = CATEGORY_PROFILES[category]
     topic_slug = "".join(ch for ch in topic.title() if ch.isalnum())
@@ -147,7 +185,7 @@ def build_hashtags(category: str, topic: str, index: int) -> List[str]:
     return profile.category_tags + [f"#{topic_slug}", "#tiktokcarousel", angle_tag]
 
 
-def make_hook(topic: str, category: str, index: int) -> str:
+def make_hook(topic: str, category: str, index: int, subtopic: str = "") -> str:
     hooks = [
         f"{topic}: what to check first.",
         f"How to check {topic} before you commit.",
@@ -170,10 +208,14 @@ def make_hook(topic: str, category: str, index: int) -> str:
         f"The plain read on {topic}.",
         f"{topic}: use this before making a decision.",
     ]
-    return ensure_voice_rules(hooks[index])
+    hook = hooks[index]
+    if subtopic and index in {0, 1, 7, 13, 19}:
+        hook = hook.rstrip(".")
+        hook = f"{hook} about {subtopic}."
+    return ensure_voice_rules(hook)
 
 
-def make_body_slides(topic: str, category: str, index: int) -> List[str]:
+def make_body_slides(topic: str, category: str, index: int, subtopic: str = "") -> List[str]:
     profile = CATEGORY_PROFILES[category]
     body_sets = [
         [
@@ -291,10 +333,18 @@ def make_body_slides(topic: str, category: str, index: int) -> List[str]:
         ],
     ]
     slides = [ensure_voice_rules(sentence(slide)) for slide in body_sets[index]]
+
+    if subtopic:
+        subtopic_slide = ensure_voice_rules(sentence(f"Then check {subtopic} before you decide"))
+        if len(slides) < 5:
+            slides.append(subtopic_slide)
+        else:
+            slides[-1] = subtopic_slide
+
     return slides
 
 
-def make_caption(topic: str, category: str, index: int) -> str:
+def make_caption(topic: str, category: str, index: int, subtopic: str = "") -> str:
     profile = CATEGORY_PROFILES[category]
     captions = [
         f"{topic} is easier to check when you start with {profile.first_filter} and then move through the details that matter next.",
@@ -318,23 +368,23 @@ def make_caption(topic: str, category: str, index: int) -> str:
         f"A better review of {topic} stays close to the source and the real use case.",
         f"{topic} usually gets clearer when you check what actually changes after the decision is made.",
     ]
-    return ensure_voice_rules(captions[index])
+    caption = captions[index]
+    if subtopic:
+        caption = f"{caption} This one focuses on {subtopic}."
+    return ensure_voice_rules(caption)
 
 
-def normalize_topics(topics: Dict[str, str] | None) -> Dict[str, str]:
+def normalize_topics(topics: Dict[str, Any] | None) -> Dict[str, TopicConfig]:
     source = topics or DEFAULT_TOPICS
-    normalized: Dict[str, str] = {}
+    normalized: Dict[str, TopicConfig] = {}
 
     for category in REQUIRED_CATEGORIES:
-        value = clean_text(source.get(category, ""))
-        if not value:
-            raise ValueError(f'Missing topic for "{category}".')
-        normalized[category] = value
+        normalized[category] = normalize_topic_entry(source.get(category, ""), category)
 
     return normalized
 
 
-def build_carousels(topics: Dict[str, str], videos_per_topic: int = 20) -> List[Dict[str, Any]]:
+def build_carousels(topics: Dict[str, Any], videos_per_topic: int = 20) -> List[Dict[str, Any]]:
     if videos_per_topic != 20:
         raise ValueError("videos_per_topic must be 20 for this build.")
 
@@ -342,11 +392,14 @@ def build_carousels(topics: Dict[str, str], videos_per_topic: int = 20) -> List[
     carousels: List[Dict[str, Any]] = []
 
     for category_index, category in enumerate(REQUIRED_CATEGORIES):
-        topic = topics[category]
+        topic_config = topics[category]
+        topic = topic_config.topic
+        subtopics = topic_config.subtopics
         for index in range(videos_per_topic):
-            hook = make_hook(topic, category, index)
-            body_slides = make_body_slides(topic, category, index)
-            caption = make_caption(topic, category, index)
+            subtopic = subtopics[index % len(subtopics)] if subtopics else ""
+            hook = make_hook(topic, category, index, subtopic=subtopic)
+            body_slides = make_body_slides(topic, category, index, subtopic=subtopic)
+            caption = make_caption(topic, category, index, subtopic=subtopic)
             hashtags = build_hashtags(category, topic, index)
 
             carousels.append(
@@ -354,6 +407,7 @@ def build_carousels(topics: Dict[str, str], videos_per_topic: int = 20) -> List[
                     "id": f"{category.lower().replace(' ', '-')}-{index + 1:02d}",
                     "category": category,
                     "topic": topic,
+                    "subtopic": subtopic,
                     "hook": hook,
                     "body_slides": body_slides,
                     "caption": caption,
@@ -370,6 +424,7 @@ def write_canva_csv(carousels: List[Dict[str, Any]], output_path: str) -> str:
         "carousel_id",
         "category",
         "topic",
+        "subtopic",
         "slide_1_hook",
         "slide_2",
         "slide_3",
@@ -390,6 +445,7 @@ def write_canva_csv(carousels: List[Dict[str, Any]], output_path: str) -> str:
                 "carousel_id": carousel["id"],
                 "category": carousel["category"],
                 "topic": carousel["topic"],
+                "subtopic": carousel.get("subtopic", ""),
                 "slide_1_hook": carousel["hook"],
                 "slide_2": body_slides[0] if len(body_slides) > 0 else "",
                 "slide_3": body_slides[1] if len(body_slides) > 1 else "",
@@ -405,13 +461,22 @@ def write_canva_csv(carousels: List[Dict[str, Any]], output_path: str) -> str:
 
 
 def generate_payload(
-    topics: Dict[str, str] | None = None,
+    topics: Dict[str, Any] | None = None,
     videos_per_topic: int = 20,
     output_path: str = "tiktok-carousels-output.json",
     csv_output_path: str = "tiktok-carousels-output.csv",
 ) -> Dict[str, Any]:
-    topics = normalize_topics(topics)
-    carousels = build_carousels(topics, videos_per_topic)
+    topic_configs = normalize_topics(topics)
+    carousels = build_carousels(
+        {
+            category: {
+                "topic": config.topic,
+                "subtopics": config.subtopics,
+            }
+            for category, config in topic_configs.items()
+        },
+        videos_per_topic,
+    )
 
     payload: Dict[str, Any] = {
         "generator": "Bulk Carousel Copy Generator",
@@ -425,7 +490,10 @@ def generate_payload(
             "no_ai_fluff": True,
             "search_friendly": True,
         },
-        "topics": topics,
+        "topics": {category: config.topic for category, config in topic_configs.items()},
+        "subtopics": {
+            category: config.subtopics for category, config in topic_configs.items() if config.subtopics
+        },
         "carousels": carousels,
     }
 
@@ -442,7 +510,7 @@ if FastMCP is not None:
 
     @mcp.tool()
     def generate_carousels(
-        topics: Dict[str, str] | None = None,
+        topics: Dict[str, Any] | None = None,
         videos_per_topic: int = 20,
         output_path: str = "tiktok-carousels-output.json",
         csv_output_path: str = "tiktok-carousels-output.csv",
