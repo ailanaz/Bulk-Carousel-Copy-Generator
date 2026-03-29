@@ -124,7 +124,9 @@ def clean_text(value: str) -> str:
 
 
 def sentence(text: str) -> str:
-    text = clean_text(text).rstrip(".")
+    text = clean_text(text).rstrip()
+    if text.endswith(("?", "!", ".")):
+        return text
     return f"{text}."
 
 
@@ -146,26 +148,26 @@ def build_hashtags(category: str, topic: str, index: int) -> List[str]:
 
 def make_hook(topic: str, category: str, index: int) -> str:
     hooks = [
-        f"{topic} gets judged too fast.",
-        f"Most people read {topic} the wrong way.",
-        f"Do not size up {topic} by first reaction.",
-        f"The real value in {topic} is easy to miss.",
-        f"If you are comparing {topic}, start here.",
-        f"{topic} makes more sense when you zoom in.",
-        f"People overcomplicate {topic}.",
-        f"Before you dismiss {topic}, read this.",
-        f"{topic} is not confusing. The framing is.",
-        f"The first question about {topic} is usually wrong.",
-        f"{topic} is easier to judge with one filter.",
-        f"Most advice around {topic} misses the point.",
-        f"Do not research {topic} like everyone else.",
-        f"The better angle on {topic} is simpler.",
-        f"{topic} is worth more than the label suggests.",
-        f"People skip the part that matters in {topic}.",
-        f"If {topic} feels messy, use this lens.",
-        f"Start smaller when you look at {topic}.",
-        f"The smartest move with {topic} is not fancy.",
-        f"{topic} gets clearer once you know this.",
+        f"{topic}: what to check first.",
+        f"How to evaluate {topic} before you commit.",
+        f"{topic} looks different once you check these three things.",
+        f"Before you choose {topic}, read this.",
+        f"{topic} is easier to assess than it seems.",
+        f"{topic}: start with the main filter.",
+        f"The practical way to look at {topic}.",
+        f"{topic}: the key details to review.",
+        f"What matters most in {topic}.",
+        f"{topic}: the first filter that matters.",
+        f"A practical way to review {topic}.",
+        f"{topic}: where people usually start too late.",
+        f"How to compare {topic} without wasting time.",
+        f"{topic}: the details worth checking.",
+        f"The simplest way to judge {topic}.",
+        f"{topic}: what changes the decision.",
+        f"What to review before you move on {topic}.",
+        f"{topic}: a cleaner way to compare it.",
+        f"The practical read on {topic}.",
+        f"{topic}: use this before making a decision.",
     ]
     return ensure_voice_rules(hooks[index])
 
@@ -179,38 +181,38 @@ def make_body_slides(topic: str, category: str, index: int) -> List[str]:
             f"Then check {profile.third_filter}.",
         ],
         [
-            f"The mistake is {profile.warning}.",
-            f"The better move is to focus on {profile.emphasis}.",
-            f"That is how {topic} becomes easier to judge.",
+            f"A common mistake is {profile.warning}.",
+            f"A better filter is {profile.emphasis}.",
+            f"That usually gives you a cleaner read on {topic}.",
         ],
         [
-            f"{topic} matters more when it supports {profile.goal}.",
+            f"{topic} matters more when it helps you {profile.goal}.",
             f"That means looking at {profile.first_filter}.",
-            f"Not just the label.",
+            "Not just the label or the pitch.",
         ],
         [
-            f"Most people start with surface details.",
-            f"You get better decisions by checking {profile.first_filter}.",
+            "Most people start with surface details.",
+            f"A better sequence starts with {profile.first_filter}.",
             f"Then {profile.second_filter}.",
-            "Then compare what stays true after the first week.",
-            f"Then the real fit.",
+            "Then compare what still makes sense after the first month.",
+            "Then decide whether the fit is real.",
         ],
         [
-            f"If you skip the source, the result gets messy.",
+            "If you skip the source, the decision gets weaker.",
             f"Check {profile.first_filter}.",
             f"Check {profile.third_filter}.",
             f"Then decide whether {topic} actually fits.",
         ],
         [
-            f"The fast read is usually wrong.",
+            "The quick read is usually incomplete.",
             f"The useful read is about {profile.emphasis}.",
-            f"That is what tells you whether {topic} is worth the effort.",
+            f"That is what tells you whether {topic} is worth more review.",
         ],
         [
-            f"Do not start with tools or opinions.",
+            "Do not start with tools or opinions.",
             f"Start with {profile.first_filter}.",
             f"Then look at {profile.second_filter}.",
-            f"That will save time later.",
+            "That usually saves time later.",
         ],
         [
             f"The point of {topic} is not the title.",
@@ -218,11 +220,11 @@ def make_body_slides(topic: str, category: str, index: int) -> List[str]:
             f"That is why {profile.emphasis} matters more.",
         ],
         [
-            f"A cleaner decision starts with one question.",
+            "A cleaner decision starts with one clear sequence.",
             f"Check {profile.first_filter}.",
             f"Then look at {profile.second_filter}.",
             f"Then look at {profile.third_filter}.",
-            f"Then the real cost of delay.",
+            "Then look at the real cost of delay.",
         ],
         [
             f"The wrong filter makes {topic} look weaker than it is.",
@@ -230,48 +232,48 @@ def make_body_slides(topic: str, category: str, index: int) -> List[str]:
             f"That is where the useful signal is.",
         ],
         [
-            f"If you want cleaner decisions, stop chasing more information.",
+            "Stop chasing more information too early.",
             f"Look for {profile.first_filter}.",
             f"Look for {profile.third_filter}.",
-            f"That is enough to move.",
+            "That is usually enough for a first pass.",
         ],
         [
-            f"People usually wait too long to check this.",
-            f"Then they fix avoidable mistakes later.",
+            "People often check this too late.",
+            "That is when avoidable mistakes show up.",
             f"{topic} gets easier when you start with the source.",
         ],
         [
-            f"The first step is smaller than people think.",
+            "The first step is usually smaller than people think.",
             f"Check {profile.first_filter}.",
             f"Write down what you find.",
             f"Then compare options from there.",
         ],
         [
             f"You do not need more noise around {topic}.",
-            f"You need a better filter.",
+            "You need a better filter.",
             f"Use {profile.first_filter}.",
             f"Then test the fit.",
         ],
         [
-            f"The useful question is simple.",
+            "The useful question is simple.",
             f"Does this make the next move clearer?",
             f"If yes, keep going.",
             f"If not, reset the filter.",
         ],
         [
-            f"Most people focus on the front end.",
-            f"The better read is the downstream effect.",
+            "Most people focus on the front end.",
+            "A better read is the downstream effect.",
             f"What does this save or change later?",
         ],
         [
-            f"A lot of confusion comes from skipping the boring part.",
-            f"But the boring part usually controls the result.",
+            "A lot of confusion comes from skipping the less visible part.",
+            "That part usually controls the result.",
             f"That is why {profile.first_filter} matters.",
         ],
         [
-            f"The goal is not to sound informed.",
-            f"The goal is to make a cleaner decision.",
-            f"That happens when you check the right things first.",
+            "The goal is not to collect more talking points.",
+            "The goal is to make a cleaner decision.",
+            "That happens when you check the right things first.",
         ],
         [
             f"Do not decide on {topic} from one article or one opinion.",
@@ -280,11 +282,11 @@ def make_body_slides(topic: str, category: str, index: int) -> List[str]:
             f"Then move.",
         ],
         [
-            f"The easiest way to reduce risk is simple.",
+            "The easiest way to reduce risk is simple.",
             f"Check {profile.first_filter}.",
             f"Check {profile.second_filter}.",
             f"Check {profile.third_filter}.",
-            f"Then check what changes if you ignore it.",
+            "Then check what changes if you ignore it.",
         ],
     ]
     slides = [ensure_voice_rules(sentence(slide)) for slide in body_sets[index]]
@@ -294,26 +296,26 @@ def make_body_slides(topic: str, category: str, index: int) -> List[str]:
 def make_caption(topic: str, category: str, index: int) -> str:
     profile = CATEGORY_PROFILES[category]
     captions = [
-        f"{topic} gets easier to judge when you stop reacting to the label and start checking what actually matters.",
-        f"If you are sorting through {topic}, use a cleaner filter. Start with {profile.first_filter}.",
-        f"The best first move with {topic} is usually smaller and more practical than people think.",
-        f"Most confusion around {topic} comes from weak framing. Check the source, the fit, and the downstream effect.",
-        f"{topic} is easier to evaluate when you stay close to the real problem instead of surface-level takes.",
-        f"A cleaner decision around {topic} starts with better questions, not more noise.",
-        f"People waste time around {topic} when they skip the part that actually controls the outcome.",
-        f"If you want a cleaner read on {topic}, stop guessing and check the right details first.",
-        f"The real value in {topic} usually shows up after you check who needs it, what it saves, and what changes next.",
-        f"{topic} gets easier to understand when you focus on the actual use case instead of the label.",
-        f"If {topic} feels messy, the filter is probably weak. Tighten the filter and the topic gets clearer.",
-        f"One clean pass through the right details tells you more about {topic} than ten vague opinions.",
-        f"The goal with {topic} is not more information. The goal is a cleaner decision.",
-        f"Most people look at {topic} too broadly. Narrow the question and the answer gets better.",
-        f"If you are still unsure about {topic}, that usually means you have not checked the real constraint yet.",
-        f"The boring checks around {topic} are often the ones that save the most time later.",
-        f"Use {topic} as a decision test, not just a talking point.",
-        f"The smarter move with {topic} is often the simpler one.",
-        f"If you want fewer mistakes around {topic}, stay close to the source and the real use case.",
-        f"The fastest way to get clearer on {topic} is to check what actually changes after you act.",
+        f"{topic} is easier to evaluate when you start with {profile.first_filter} and follow the practical details that matter next.",
+        f"{topic} usually gets clearer when you use a better filter, beginning with {profile.first_filter}.",
+        f"A practical review of {topic} starts with the basics, then moves into fit, demand, and real-world use.",
+        f"{topic} is easier to compare when you check the source, the fit, and the details that affect the decision.",
+        f"{topic} is usually judged too quickly. A more useful review stays close to the real problem and the actual use case.",
+        f"A cleaner read on {topic} starts with better questions and fewer assumptions.",
+        f"{topic} becomes easier to assess when you check the part that actually controls the outcome.",
+        f"{topic} is easier to review when you stop guessing and check the right details first.",
+        f"The real value in {topic} usually shows up after you review fit, timing, and what changes next.",
+        f"{topic} makes more sense when you focus on the actual use case instead of surface-level advice.",
+        f"If {topic} still feels unclear, the issue is usually the filter. Start with the practical details first.",
+        f"One clean pass through the right details will usually tell you more about {topic} than broad general advice.",
+        f"The goal with {topic} is not more noise. The goal is a cleaner decision.",
+        f"{topic} usually gets easier to understand when the question gets narrower and more practical.",
+        f"If you are still unsure about {topic}, the next step is usually to check the real constraint rather than collect more opinions.",
+        f"The less visible checks around {topic} are often the ones that save the most time later.",
+        f"{topic} works better as a decision test than a vague research topic.",
+        f"The simpler read on {topic} is often the more useful one.",
+        f"A better review of {topic} stays close to the source and the real use case.",
+        f"{topic} usually gets clearer when you check what actually changes after the decision is made.",
     ]
     return ensure_voice_rules(captions[index])
 
@@ -377,8 +379,9 @@ def generate_payload(
         "voice_rules": {
             "no_em_dash": True,
             "forbidden_terms": list(FORBIDDEN_TERMS[:4]),
-            "tone": "plain human tone",
+            "tone": "neutral human tone",
             "no_ai_fluff": True,
+            "search_friendly": True,
         },
         "topics": topics,
         "carousels": carousels,
