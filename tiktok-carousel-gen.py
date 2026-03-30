@@ -34,7 +34,6 @@ def main() -> None:
     topics = load_topics(args.input)
     payload = generate_payload(
         topics=topics,
-        videos_per_topic=20,
         output_path=args.output_json,
         csv_output_path=args.output_csv,
     )

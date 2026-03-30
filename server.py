@@ -384,10 +384,8 @@ def normalize_topics(topics: Dict[str, Any] | None) -> Dict[str, TopicConfig]:
     return normalized
 
 
-def build_carousels(topics: Dict[str, Any], videos_per_topic: int = 20) -> List[Dict[str, Any]]:
-    if videos_per_topic != 20:
-        raise ValueError("videos_per_topic must be 20 for this build.")
-
+def build_carousels(topics: Dict[str, Any]) -> List[Dict[str, Any]]:
+    videos_per_topic = 20
     topics = normalize_topics(topics)
     carousels: List[Dict[str, Any]] = []
 
@@ -456,7 +454,6 @@ def write_canva_csv(carousels: List[Dict[str, Any]], output_path: str) -> str:
 
 def generate_payload(
     topics: Dict[str, Any] | None = None,
-    videos_per_topic: int = 20,
     output_path: str = "tiktok-carousels-output.json",
     csv_output_path: str = "tiktok-carousels-output.csv",
 ) -> Dict[str, Any]:
@@ -468,20 +465,19 @@ def generate_payload(
                 "subtopics": config.subtopics,
             }
             for category, config in topic_configs.items()
-        },
-        videos_per_topic,
+        }
     )
 
     payload: Dict[str, Any] = {
         "generator": "Bulk Carousel Copy Generator",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "total_carousels": len(carousels),
-        "videos_per_topic": videos_per_topic,
+        "videos_per_topic": 20,
         "voice_rules": {
             "no_em_dash": True,
             "forbidden_terms": list(FORBIDDEN_TERMS[:4]),
             "tone": "neutral human tone",
-            "no_ai_fluff": True,
+            "plain_language": True,
             "search_friendly": True,
         },
         "topics": {category: config.topic for category, config in topic_configs.items()},
@@ -505,14 +501,12 @@ if FastMCP is not None:
     @mcp.tool()
     def generate_carousels(
         topics: Dict[str, Any] | None = None,
-        videos_per_topic: int = 20,
         output_path: str = "tiktok-carousels-output.json",
         csv_output_path: str = "tiktok-carousels-output.csv",
     ) -> Dict[str, Any]:
         """Generate bulk TikTok photo carousel copy and write it to JSON and CSV files."""
         return generate_payload(
             topics=topics,
-            videos_per_topic=videos_per_topic,
             output_path=output_path,
             csv_output_path=csv_output_path,
         )

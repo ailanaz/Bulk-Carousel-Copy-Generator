@@ -24,7 +24,7 @@ Each carousel includes:
 The built-in voice rules are strict:
 
 - no em dashes
-- no AI fluff
+- no filler language
 - no "hustle", "gig", "freelance", or "passive income"
 - plain human tone
 
@@ -147,7 +147,6 @@ Input shape:
     "Supportive Services": "LLC formation services",
     "Official Links": "Cottage food laws by state"
   },
-  "videos_per_topic": 20,
   "output_path": "tiktok-carousels-output.json",
   "csv_output_path": "tiktok-carousels-output.csv"
 }
@@ -173,7 +172,7 @@ The CSV file is flat and Canva-friendly. Each row is one carousel with these col
 
 ## Standalone use
 
-Run this anytime:
+The standalone script must be run from the cloned repo directory. It imports directly from `server.py`, so both files need to be in the same location.
 
 ```bash
 python3 tiktok-carousel-gen.py
@@ -216,7 +215,7 @@ The JSON output looks like this:
       "id": "business-ideas-01",
       "category": "Business Ideas",
       "topic": "Biohazard cleanup service",
-      "hook": "Biohazard cleanup service gets judged too fast.",
+      "hook": "Biohazard cleanup service: what to check first.",
       "body_slides": [
         "Start with who already pays for this problem.",
         "Then check what the average job is worth.",
@@ -238,6 +237,6 @@ The JSON output looks like this:
 
 ## Notes
 
-- `videos_per_topic` is fixed at `20` for this build
+- each run generates exactly 20 carousels per topic (100 total)
 - all five categories are required
 - output includes both JSON and CSV so it is easy to route into sheets, design tools, Canva Bulk Create, or later post-processing
