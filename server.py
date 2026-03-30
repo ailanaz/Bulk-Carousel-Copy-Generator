@@ -395,6 +395,7 @@ def build_carousels(topics: Dict[str, Any], videos_per_topic: int = 20) -> List[
         topic_config = topics[category]
         topic = topic_config.topic
         subtopics = topic_config.subtopics
+        profile = CATEGORY_PROFILES[category]
         for index in range(videos_per_topic):
             subtopic = subtopics[index % len(subtopics)] if subtopics else ""
             hook = make_hook(topic, category, index, subtopic=subtopic)
@@ -410,6 +411,7 @@ def build_carousels(topics: Dict[str, Any], videos_per_topic: int = 20) -> List[
                     "subtopic": subtopic,
                     "hook": hook,
                     "body_slides": body_slides,
+                    "cta": profile.cta,
                     "caption": caption,
                     "hashtags": hashtags,
                 }
@@ -421,18 +423,14 @@ def build_carousels(topics: Dict[str, Any], videos_per_topic: int = 20) -> List[
 def write_canva_csv(carousels: List[Dict[str, Any]], output_path: str) -> str:
     output_file = Path(output_path).resolve()
     fieldnames = [
-        "carousel_id",
-        "category",
-        "topic",
-        "subtopic",
-        "slide_1_hook",
-        "slide_2",
-        "slide_3",
-        "slide_4",
-        "slide_5",
-        "slide_6",
-        "caption",
-        "hashtags",
+        "title",
+        "hook",
+        "body_1",
+        "body_2",
+        "body_3",
+        "body_4",
+        "body_5",
+        "cta",
     ]
 
     with output_file.open("w", encoding="utf-8", newline="") as handle:
@@ -442,18 +440,14 @@ def write_canva_csv(carousels: List[Dict[str, Any]], output_path: str) -> str:
         for carousel in carousels:
             body_slides = carousel["body_slides"]
             row = {
-                "carousel_id": carousel["id"],
-                "category": carousel["category"],
-                "topic": carousel["topic"],
-                "subtopic": carousel.get("subtopic", ""),
-                "slide_1_hook": carousel["hook"],
-                "slide_2": body_slides[0] if len(body_slides) > 0 else "",
-                "slide_3": body_slides[1] if len(body_slides) > 1 else "",
-                "slide_4": body_slides[2] if len(body_slides) > 2 else "",
-                "slide_5": body_slides[3] if len(body_slides) > 3 else "",
-                "slide_6": body_slides[4] if len(body_slides) > 4 else "",
-                "caption": carousel["caption"],
-                "hashtags": " ".join(carousel["hashtags"]),
+                "title": carousel["topic"],
+                "hook": carousel["hook"],
+                "body_1": body_slides[0] if len(body_slides) > 0 else "",
+                "body_2": body_slides[1] if len(body_slides) > 1 else "",
+                "body_3": body_slides[2] if len(body_slides) > 2 else "",
+                "body_4": body_slides[3] if len(body_slides) > 3 else "",
+                "body_5": body_slides[4] if len(body_slides) > 4 else "",
+                "cta": carousel["cta"],
             }
             writer.writerow(row)
 

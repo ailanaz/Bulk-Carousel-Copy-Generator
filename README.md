@@ -162,18 +162,14 @@ The tool writes:
 
 The CSV file is flat and Canva-friendly. Each row is one carousel with these columns:
 
-- `carousel_id`
-- `category`
-- `topic`
-- `subtopic`
-- `slide_1_hook`
-- `slide_2`
-- `slide_3`
-- `slide_4`
-- `slide_5`
-- `slide_6`
-- `caption`
-- `hashtags`
+- `title`
+- `hook`
+- `body_1`
+- `body_2`
+- `body_3`
+- `body_4`
+- `body_5`
+- `cta`
 
 ## Standalone use
 
@@ -190,7 +186,7 @@ tiktok-carousels-output.json
 tiktok-carousels-output.csv
 ```
 
-The CSV file is the one to use for Canva Bulk Create.
+The CSV file is the one to use for Canva Bulk Create. It only includes the text fields most people will map in Canva.
 
 ## Standalone use with your own topics
 
